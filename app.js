@@ -35,11 +35,11 @@ app.listen(9292, () => {
 // Populate the database with all the Denzel's movies from IMDb.
 app.get("/movies/populate", async(request, response) => {
     // Get movies
-    //const movie = await imdb(DENZEL_IMDB_ID);
-    const movies = await sandbox.movies;
+    const movie = await imdb(DENZEL_IMDB_ID);
+    //const movies = await sandbox.movies;
     collection = database.collection("Denzel");
     // Insert movies
-    collection.insertMany(movies, (error, result) => {
+    collection.insertMany(movie, (error, result) => {
         if(error) {
             return response.status(500).send(error);
         }
@@ -48,6 +48,7 @@ app.get("/movies/populate", async(request, response) => {
 });
 
 // => GET /movies
+
 // Fetch a random must-watch movie.
 
 app.get("/movies", (request, response) => {
@@ -78,16 +79,16 @@ app.get("/movies/:id", (request, response) => {
 
 app.get("/movies/search", (request, response) => {
   // limit - number of movies to return (default: 5)
-  const limit = request.query.limit;
+  var limit = request.query.limit;
+  // metascore - filter by metascore (default: 0)
+  var metascore = request.query.metascore;
   if(limit==undefined) {
     limit = 5;
   }
-  // metascore - filter by metascore (default: 0)
-  const metascore = request.query.metascore;
   if(metascore==undefined) {
     metascore = 0;
   }
-    collection = database.collection("Denzel");
+   collection = database.collection("Denzel");
   // and we use aggreate function
     collection.aggregate([{$match: {"metascore": {$gte: Number(metascore)}}}, {$limit: Number(limit)}, {$sort: {"metascore": -1}}]).toArray((error, result) => {
         if(error) {
@@ -99,7 +100,7 @@ app.get("/movies/search", (request, response) => {
 
 // => POST /movies/:id
 // Save a watched date and a review
-/*
+
 app.post("/movies/:id", (request, response) => {
     // register the date and the review from the body
     // date - the watched date
@@ -107,14 +108,14 @@ app.post("/movies/:id", (request, response) => {
     // review - the personal review
     const review = request.body.review;
     collection = database.collection("Denzel");
-    collection.updateOne({ "_id": new ObjectId(request.params.id) },{$set : {"date" : date, "review" : review}}, (error, result) => {
+    collection.updateOne({ "_id": new ObjectId(request.params.id) },{$set : {"date": date, "review": review}}, (error, result) => {
         if(error) {
             return response.status(500).send(error);
         }
         response.send(result);
     });
 });
-*/
+
 // => GraphQL endpoints to implement
 // Same definition as REST API with /graphql endpoint
 

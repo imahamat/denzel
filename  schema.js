@@ -1,11 +1,8 @@
 const typeDefs = `
 type Movie {
-  id: ID! # the ! means that every author object _must_ have an id
+  id: ID! #
   link: String
-  methascore: Int
-  """
-  the list of Posts by this author
-  """
+  metascore: Int
   poster: String
   rating: Int
   synopsis: String
@@ -14,20 +11,25 @@ type Movie {
   year: Int
 }
 
-# the schema allows the following query:
 type Query {
-  movie(_id: String): Movie
-  RandomMovie: [Movie]
-  FetchMovie(limit: Int, metascore: Int): [Movie]
-  PostMovie(_id: String, date: String, review: String): String
+  # GET /movies/populate
   populate: Int
+
+  # => GET /movies | Random movies
+  fecth_random_movie: [Movie]
+
+  # => GET /movies/:id
+  fecth_specific_movie : Movie
+
+  # => GET /movies/search
+  # search_Movie(limit: Int, metascore: Int): [Movie]
+
+  # => POST /movies/:id
+  post_Movie(_id: String, date: String, review: String): String
 }
 
-# we need to tell the server which types represent the root query
-# and root mutation types. We call them RootQuery and RootMutation by convention.
 schema {
   query: Query
-  movie: Movie
 }
 `;
 
