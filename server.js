@@ -22,24 +22,22 @@ MongoClient.connect(CONNECTION_URL, { useNewUrlParser: true }, (error, client) =
 
 // GraphQL schema
 var schema = buildSchema(`
-  type Movie {
-    link: String
-    metascore: Int
-    poster: String
-    rating: Int
-    synopsis: String
-    title: String
-    votes: Int
-    year: Int
-  }
-    type Query {
+  type Query {
         message: String
         populate: Int
-        fecth_random_movie: [Movie]
-        fecth_specific_movie : Movie
+        fetch_random_movie: [Movie]
+        fetch_specific_movie(_id: String): Movie
         post_Movie(_id: String, date: String, review: String): String
     }
 
+    type Movie {
+      id:ID!
+      link: String
+      metascore: Int
+      rating: Int
+      title: String
+      year: Int
+    }
 `);
 // Root resolver
 var root = {
@@ -49,25 +47,25 @@ var root = {
       // Get movies From the RestAPI
      const DENZEL_IMDB_ID = 'nm0000243';
      const movies = await imdb(DENZEL_IMDB_ID);
-      collection.insertMany(
+      await collection.insertMany(
       movies);
           return collection.countDocuments();
     },
     // => GET /movies | Random movies
     fetch_random_movie: async () => {
-      const random_movie = collection.aggregate([{$sample: {size: 1}}]).toArray();
+      const random_movie = await collection.aggregate([{$sample: {size: 1}}]).toArray();
       return random_movie;
     },
     // => GET /movies/:id
-    fecth_specific_movie: async() => {
-      const ObjectId = require("mongodb").ObjectID;
-      const movie = collection.findOne({ "_id": new ObjectId(request.params.id)});
+    fetch_specific_movie: async(root,{_id}) => {
+      const movie = await collection.findOne({ "id":_id});
       return movie;
-      //return await collection.findOne({"_id": _id});
     },
     post_Movie: async(root, {_id, date, review}) => {
-      collection.updateOne({ "id": _id },{$set : {"date": date, "review": review}});
+
+      await collection.updateOne({ "id": _id },{$set : {"date": date, "review": review}});
       return "Post of "+ review + "at "+ date+"related to id: "+_id +" done ! ";
+    //  return review + date+_id ;
     }
 };
 // Create an express server and a GraphQL endpoint

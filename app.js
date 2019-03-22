@@ -74,6 +74,27 @@ app.get("/movies/:id", (request, response) => {
     });
 });
 
+
+
+// => POST /movies/:id
+// Save a watched date and a review
+
+app.post("/movies/:id", (request, response) => {
+    // register the date and the review from the body
+    // date - the watched date
+    const date = request.body.date;
+    // review - the personal review
+    const review = request.body.review;
+    collection = database.collection("Denzel");
+    collection.updateOne({ "_id": new ObjectId(request.params.id) },{$set : {"date": date, "review": review}}, (error, result) => {
+        if(error) {
+            return response.status(500).send(error);
+        }
+        response.send(result);
+    });
+});
+
+
 // => GET /movies/search
 // Search for Denzel's movies
 
@@ -98,23 +119,7 @@ app.get("/movies/search", (request, response) => {
     });
 });
 
-// => POST /movies/:id
-// Save a watched date and a review
 
-app.post("/movies/:id", (request, response) => {
-    // register the date and the review from the body
-    // date - the watched date
-    const date = request.body.date;
-    // review - the personal review
-    const review = request.body.review;
-    collection = database.collection("Denzel");
-    collection.updateOne({ "_id": new ObjectId(request.params.id) },{$set : {"date": date, "review": review}}, (error, result) => {
-        if(error) {
-            return response.status(500).send(error);
-        }
-        response.send(result);
-    });
-});
 
 // => GraphQL endpoints to implement
 // Same definition as REST API with /graphql endpoint
